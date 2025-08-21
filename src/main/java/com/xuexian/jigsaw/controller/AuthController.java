@@ -58,7 +58,11 @@ public class AuthController {
         }
     }
 
-
+    /**
+     * 从拼图首页登陆的自定义登录业务
+     * @param loginForm
+     * @return
+     */
     @PostMapping("/login")
     public Result login(@RequestBody LoginFormDTO loginForm) {
         // 查询用户
@@ -84,8 +88,7 @@ public class AuthController {
                 List.of("USER") // 暂定,到时候从表拿
         );
 
-        // 存入 UserHolder
-        UserHolder.saveUser(userDTO);
+
 
         // 生成 JWT
         String jwt = JwtUtil.generateToken(user.getId(), user.getNickName(), userDTO.getRoles());
