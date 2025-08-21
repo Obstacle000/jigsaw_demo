@@ -25,9 +25,12 @@ public class JwtInterceptor implements HandlerInterceptor {
         try {
             String token = authHeader.substring(7);
             var claims = JwtUtil.parseToken(token);
+
             UserDTO user = new UserDTO(
                     Long.valueOf(claims.getId()),
                     claims.getSubject(),
+                    (String) claims.get("icon"),
+                    (Long) claims.get("level"),
                     claims.get("roles", List.class)
             );
             UserHolder.saveUser(user);

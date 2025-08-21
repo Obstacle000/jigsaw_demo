@@ -11,6 +11,8 @@ import java.util.List;
 public class UserDTO {
     private Long id;
     private String nickName;
+    private String icon;
+    private Long level;
     private List<String> roles;
 
 

@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("tb_user")
+@TableName("user")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,11 +31,11 @@ public class User implements Serializable {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
     /**
-     * 手机号码
+     * 用户名
      */
-    private String phone;
+    private String userName;
+
 
     /**
      * 密码，加密存储
@@ -61,6 +61,8 @@ public class User implements Serializable {
      * 更新时间
      */
     private LocalDateTime updateTime;
+
+    private Long level;
 
 
 }
