@@ -9,14 +9,20 @@ spring:
     username: root
     password: 123456
   jackson:
-    default-property-inclusion: non_null # JSON?????????
+    default-property-inclusion: non_null
   data:
     redis:
       password: 123321
       host: 192.168.194.128
       port: 6379
+alioss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  access-key-id: ${OSS_ACCESS_KEY_ID}
+  access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+  bucket-name: jigsaw11
+
 mybatis-plus:
-  type-aliases-package: com.xuexian.entity # ?????
+  type-aliases-package: com.xuexian.entity
 logging:
   level:
     com.hmdp: debug
