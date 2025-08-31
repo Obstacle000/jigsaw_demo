@@ -50,14 +50,15 @@ public class PieceController {
     }
 
     /**
-     * 保存或完成拼图接口
+     * 获取当前拼图块状态
+     * @param jigsawId 拼图ID
+     * @param userId 用户ID
+     * @return 当前拼图状态及进度
      */
-    @PostMapping("/{jigsawId}/saveOrComplete")
-    public Result saveOrComplete(@PathVariable Long jigsawId,
-                                 @RequestBody Map<String, Object> body) {
-        Long userId = UserHolder.getUser().getId();
-        String piecesJson = JSONUtil.toJsonStr(body.get("pieces"));
-        return pieceService.saveOrComplete(jigsawId, userId, piecesJson);
+    @GetMapping("/current")
+    public Result getCurrentPieces(@RequestParam Long jigsawId,
+                                   @RequestParam Long userId) {
+        return pieceService.getCurrentPieces(jigsawId, userId);
     }
 
 
