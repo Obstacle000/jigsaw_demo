@@ -1,14 +1,11 @@
 package com.xuexian.jigsaw.handler;
 
-import com.xuexian.jigsaw.entity.Code;
+import com.xuexian.jigsaw.util.Code;
 import com.xuexian.jigsaw.exception.BusinessException;
 import com.xuexian.jigsaw.exception.SystemException;
 import com.xuexian.jigsaw.vo.Result;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.sql.SQLIntegrityConstraintViolationException;
 
 
 @RestControllerAdvice

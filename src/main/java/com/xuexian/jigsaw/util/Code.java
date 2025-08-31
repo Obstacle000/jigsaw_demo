@@ -1,4 +1,4 @@
-package com.xuexian.jigsaw.entity;
+package com.xuexian.jigsaw.util;
 
 public class Code {
     public static final Integer SAVE_OK = 20011;

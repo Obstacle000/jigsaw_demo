@@ -2,9 +2,13 @@ package com.xuexian.jigsaw.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuexian.jigsaw.entity.Jigsaw;
 import com.xuexian.jigsaw.entity.Piece;
+import com.xuexian.jigsaw.entity.Record;
 import com.xuexian.jigsaw.exception.BusinessException;
+import com.xuexian.jigsaw.mapper.JigsawMapper;
 import com.xuexian.jigsaw.mapper.PieceMapper;
+import com.xuexian.jigsaw.mapper.RecordMapper;
 import com.xuexian.jigsaw.service.IPieceService;
 import com.xuexian.jigsaw.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +16,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.xuexian.jigsaw.entity.Code.JIGSAW_UNDO_FAIL;
+import static com.xuexian.jigsaw.util.Code.JIGSAW_UNDO_FAIL;
 import static com.xuexian.jigsaw.util.RedisConstants.CURRENT_KEY;
 import static com.xuexian.jigsaw.util.RedisConstants.HISTORY_KEY;
 
@@ -29,6 +34,12 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private JigsawMapper jigsawMapper;
+
+    @Autowired
+    private RecordMapper recordMapper;
 
     @Override
     public List<Piece> listByJigsawId(Integer jigsawId) {
@@ -121,4 +132,94 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
 
         return JSONUtil.toJsonStr(initialPieces);
     }
+
+    @Override
+    public Result saveOrComplete(Long jigsawId, Long userId, String piecesJson) {
+        String currentKey = String.format(CURRENT_KEY, jigsawId, userId);
+        String historyKey = String.format(HISTORY_KEY, jigsawId, userId);
+
+        // 解析拼图块状态
+        List<Map<String, Object>> pieces = JSONUtil.toBean(piecesJson, List.class);
+
+        long total = pieces.size();
+        long placedCount = pieces.stream().filter(p -> Boolean.TRUE.equals(p.get("placed"))).count();
+
+        // 判断是否全部正确（可加 isInCorrectPosition 逻辑）
+        boolean completed = placedCount == total;
+
+        // 保存当前状态到 Redis
+        stringRedisTemplate.opsForValue().set(currentKey, piecesJson);
+
+        // 历史栈压入
+        stringRedisTemplate.opsForList().rightPush(historyKey, piecesJson);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("pieces", pieces);
+
+        if (!completed) {
+            int progress = (int) (placedCount * 100 / total);
+            response.put("progress", progress);
+            response.put("completed", false);
+        } else {
+            // 拼图完成，记录完成到 record 表
+            Record record = new Record();
+            record.setId(userId.intValue());
+            record.setJigsawId(jigsawId.intValue());
+            record.setCreatedAt(LocalDateTime.now());
+            record.setUpdatedAt(LocalDateTime.now());
+            recordMapper.insert(record);
+
+            response.put("progress", 100);
+            response.put("completed", true);
+            response.put("background", getJigsawBackground(jigsawId));
+        }
+
+        return Result.success(response);
+    }
+
+
+    /**
+     * 查询拼图背景故事
+     */
+    private String getJigsawBackground(Long jigsawId) {
+        Jigsaw jigsaw = jigsawMapper.selectById(jigsawId);
+        return jigsaw != null ? jigsaw.getBackground() : "";
+    }
+
+    @Override
+    public Result getCurrentPieces(Long jigsawId, Long userId) {
+        String currentKey = String.format(CURRENT_KEY, jigsawId, userId);
+        String historyKey = String.format(HISTORY_KEY, jigsawId, userId);
+
+        // 尝试从 Redis 获取当前状态
+        String currentStateJson = stringRedisTemplate.opsForValue().get(currentKey);
+
+        List<Map<String, Object>> pieces;
+        int progress;
+
+        if (currentStateJson != null) {
+            // 用户之前玩过，从 Redis 获取状态
+            pieces = JSONUtil.toBean(currentStateJson, List.class);
+            long total = pieces.size();
+            long placedCount = pieces.stream().filter(p -> Boolean.TRUE.equals(p.get("placed"))).count();
+            progress = (int) (placedCount * 100 / total);
+        } else {
+            // 用户第一次进入，从数据库获取初始状态
+            String initialStateJson = getInitialJigsawState(jigsawId);
+            pieces = JSONUtil.toBean(initialStateJson, List.class);
+
+            // 写入 Redis 的当前状态，但不操作历史栈
+            stringRedisTemplate.opsForValue().set(currentKey, initialStateJson);
+
+            progress = 0;
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("pieces", pieces);
+        response.put("progress", progress);
+
+        return Result.success(response);
+    }
+
+
 }

@@ -1,15 +1,9 @@
 package com.xuexian.jigsaw.service.impl;
 
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xuexian.jigsaw.entity.Jigsaw;
-import com.xuexian.jigsaw.entity.Piece;
-import com.xuexian.jigsaw.exception.BusinessException;
 import com.xuexian.jigsaw.mapper.JigsawMapper;
-import com.xuexian.jigsaw.mapper.PieceMapper;
 import com.xuexian.jigsaw.service.IJigsawService;
-import com.xuexian.jigsaw.util.RedisConstants;
-import com.xuexian.jigsaw.vo.Result;
 import com.xuexian.jigsaw.vo.ScrollResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,11 +12,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-
-
-import static com.xuexian.jigsaw.entity.Code.JIGSAW_UNDO_FAIL;
-import static com.xuexian.jigsaw.util.RedisConstants.CURRENT_KEY;
-import static com.xuexian.jigsaw.util.RedisConstants.HISTORY_KEY;
 
 
 @Service

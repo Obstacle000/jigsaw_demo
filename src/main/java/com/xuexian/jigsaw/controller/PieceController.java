@@ -1,14 +1,14 @@
 package com.xuexian.jigsaw.controller;
 
+import cn.hutool.json.JSONUtil;
 import com.xuexian.jigsaw.service.IJigsawService;
 import com.xuexian.jigsaw.service.IPieceService;
 import com.xuexian.jigsaw.util.UserHolder;
 import com.xuexian.jigsaw.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/piece")
@@ -37,4 +37,28 @@ public class PieceController {
         Long userId = UserHolder.getUser().getId();
         return pieceService.reset(jigsawId, userId);
     }
+
+    /**
+     * 拼图保存或完成接口
+     * @param jigsawId 拼图ID
+     * @param piecesJson 当前拼图块状态JSON
+     */
+    @PostMapping("/{jigsawId}/saveOrComplete")
+    public Result saveOrComplete(@PathVariable Long jigsawId, @RequestBody String piecesJson) {
+        Long userId = UserHolder.getUser().getId();
+        return pieceService.saveOrComplete(jigsawId, userId, piecesJson);
+    }
+
+    /**
+     * 保存或完成拼图接口
+     */
+    @PostMapping("/{jigsawId}/saveOrComplete")
+    public Result saveOrComplete(@PathVariable Long jigsawId,
+                                 @RequestBody Map<String, Object> body) {
+        Long userId = UserHolder.getUser().getId();
+        String piecesJson = JSONUtil.toJsonStr(body.get("pieces"));
+        return pieceService.saveOrComplete(jigsawId, userId, piecesJson);
+    }
+
+
 }

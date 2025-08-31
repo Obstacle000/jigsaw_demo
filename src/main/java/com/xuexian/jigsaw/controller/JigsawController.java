@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @RestController
-@RequestMapping("/jigsaws")
+@RequestMapping("/jigsaw")
 public class JigsawController {
 
     private final IJigsawService jigsawService;
@@ -40,6 +40,15 @@ public class JigsawController {
                 : null;
         ScrollResult<Jigsaw> result = jigsawService.scrollJigsawByCategory(categoryId, maxDateTime, offset, limit, userId);
         return Result.success(result);
+    }
+
+    @GetMapping("/{jigsawId}/full-image")
+    public Result<String> getFullImage(@PathVariable Long jigsawId) {
+        Jigsaw jigsaw = jigsawService.getById(jigsawId);
+        if (jigsaw == null) {
+            return Result.error("拼图不存在");
+        }
+        return Result.success(jigsaw.getUrl()); // 返回完整图片 URL
     }
 
 

@@ -18,4 +18,5 @@ public class Jigsaw {
     private String background;
     private Integer pieceCount;
     private LocalDateTime createdAt;
+    private String url;
 }
