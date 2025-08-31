@@ -37,6 +37,7 @@ public class User implements Serializable {
     private String userName;
 
 
+
     /**
      * 密码，加密存储
      */

@@ -29,8 +29,6 @@ public class JwtInterceptor implements HandlerInterceptor {
             UserDTO user = new UserDTO(
                     Long.valueOf(claims.getId()),
                     claims.getSubject(),
-                    (String) claims.get("icon"),
-                    (Long) claims.get("level"),
                     claims.get("roles", List.class)
             );
             UserHolder.saveUser(user);

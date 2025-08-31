@@ -4,27 +4,39 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.io.Serializable;
 
+/**
+ * 后端统一返回结果
+ * @param <T>
+ */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class Result {
-    private Boolean success;
-    private String errorMsg;
-    private Object data;
-    private Long total;
+@NoArgsConstructor
+public class Result<T> implements Serializable {
 
-    public static Result ok(){
-        return new Result(true, null, null, null);
+    private Integer code; //编码：1成功，0和其它数字为失败
+    private String msg; //错误信息
+    private T data; //数据
+
+    public static <T> Result<T> success() {
+        Result<T> result = new Result<T>();
+        result.code = 1;
+        return result;
     }
-    public static Result ok(Object data){
-        return new Result(true, null, data, null);
+
+    public static <T> Result<T> success(T object) {
+        Result<T> result = new Result<T>();
+        result.data = object;
+        result.code = 1;
+        return result;
     }
-    public static Result ok(List<?> data, Long total){
-        return new Result(true, null, data, total);
+
+    public static <T> Result<T> error(String msg) {
+        Result result = new Result();
+        result.msg = msg;
+        result.code = 0;
+        return result;
     }
-    public static Result fail(String errorMsg){
-        return new Result(false, errorMsg, null, null);
-    }
+
 }

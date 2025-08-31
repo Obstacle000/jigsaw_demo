@@ -1,6 +1,5 @@
 package com.xuexian.jigsaw.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.xuexian.jigsaw.dto.CasPageLogin;
 import com.xuexian.jigsaw.dto.LoginFormDTO;
@@ -8,18 +7,15 @@ import com.xuexian.jigsaw.dto.UserDTO;
 import com.xuexian.jigsaw.entity.User;
 import com.xuexian.jigsaw.service.IUserService;
 import com.xuexian.jigsaw.util.JwtUtil;
-import com.xuexian.jigsaw.util.UserHolder;
+import com.xuexian.jigsaw.util.PasswordEncoder;
 import com.xuexian.jigsaw.vo.Result;
 import io.jsonwebtoken.Claims;
-import io.lettuce.core.models.stream.ClaimedMessages;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +27,7 @@ public class AuthController {
     private  IUserService userService;
 
     /**
-     * 统一认证拿到casId后重定向到默认拼图页面
+     * 统一认证拿到一次jwt,解析后重定向到默认拼图页面
      * @param token
      * @param response
      * @return
@@ -53,6 +49,19 @@ public class AuthController {
         // 如果解密token成功，那么这是一个合法的登入
         else {
             // 合法登入逻辑处理
+            // 往数据库里存用户名和密码
+            User user = userService.getOne(Wrappers.<User>lambdaQuery()
+                    .eq(User::getUserName, casId));
+            if (user == null) {
+                user = new User()
+                        .setUserName(casId)
+                        .setPassword(PasswordEncoder.encode(casId))
+                        .setNickName("用户" + casId) // 给个默认昵称
+                        .setCreateTime(LocalDateTime.now())
+                        .setUpdateTime(LocalDateTime.now())
+                        .setLevel(1L); // 默认等级
+                userService.save(user);
+            }
             response.sendRedirect(CasPageLogin.DEFAULT_FORWARD + "?casId=" + casId);
             return null;
         }
@@ -72,28 +81,29 @@ public class AuthController {
         );
 
         if (user == null) {
-            return Result.fail("用户名不存在");
+            // 跳转到统一认证
+
+            return Result.error("用户名不存在");
         }
 
-        if (!user.getPassword().equals(loginForm.getPassword())) {
-            return Result.fail("密码错误");
+
+
+        if (!PasswordEncoder.matches(loginForm.getPassword(), user.getPassword())) {
+            return Result.error("密码错误");
         }
 
-        // 构建 UserDTO
         UserDTO userDTO = new UserDTO(
                 user.getId(),
                 user.getNickName(),
-                user.getIcon(),
-                user.getLevel(),
                 List.of("USER") // 暂定,到时候从表拿
         );
 
 
 
-        // 生成 JWT
-        String jwt = JwtUtil.generateToken(user.getId(), user.getNickName(), userDTO.getRoles());
+        // 生成token
+        String jwt = JwtUtil.generateToken(user.getId(), user.getUserName(), userDTO.getRoles());
 
-        return Result.ok(Map.of(
+        return Result.success(Map.of(
                 "user", userDTO,
                 "token", jwt
         ));

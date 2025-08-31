@@ -2,12 +2,12 @@ server:
   port: 8081
 spring:
   application:
-    name: hmdp
+    name: jigsaw
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.194.128:3306/jigsaw?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-    username: root
-    password: 123456
+    url: jdbc:mysql://121.41.65.114:3306/jigsaw?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    username: jigsaw_handler
+    password: aH7aN6mS5sG8eF0
   jackson:
     default-property-inclusion: non_null
   data:
