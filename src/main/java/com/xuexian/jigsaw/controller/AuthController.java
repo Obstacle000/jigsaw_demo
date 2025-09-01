@@ -95,7 +95,7 @@ public class AuthController {
 
 
 
-        if (!PasswordEncoder.matches(loginForm.getPassword(), user.getPassword())) {
+        if (!PasswordEncoder.matches( user.getPassword(),loginForm.getPassword())) {
             return Result.error("密码错误");
         }
 
