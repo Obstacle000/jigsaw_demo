@@ -1,4 +1,4 @@
-package com.xuexian.jigsaw.controller;
+package com.xuexian.jigsaw.controller.user;
 
 import com.xuexian.jigsaw.util.UserHolder;
 import com.xuexian.jigsaw.vo.Result;

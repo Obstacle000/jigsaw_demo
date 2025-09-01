@@ -1,14 +1,10 @@
-package com.xuexian.jigsaw.controller;
+package com.xuexian.jigsaw.controller.user;
 
-import cn.hutool.json.JSONUtil;
-import com.xuexian.jigsaw.service.IJigsawService;
 import com.xuexian.jigsaw.service.IPieceService;
 import com.xuexian.jigsaw.util.UserHolder;
 import com.xuexian.jigsaw.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/piece")

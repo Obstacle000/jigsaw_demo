@@ -12,6 +12,10 @@ public class UserDTO {
     private Long id;
     private String nickName;
     private List<String> roles;
+    /** 判断是否管理员 */
+    public boolean isAdmin() {
+        return roles != null && roles.contains("ADMIN");
+    }
 
 
 

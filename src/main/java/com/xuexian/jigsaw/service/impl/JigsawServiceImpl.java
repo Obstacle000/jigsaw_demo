@@ -49,7 +49,7 @@ public class JigsawServiceImpl extends ServiceImpl<JigsawMapper, Jigsaw> impleme
 
         // 计算新的 minTime 和 offset
         LocalDateTime minTime = jigsaws.get(jigsaws.size() - 1).getCreatedAt();
-        int os = 1;
+        int os = 0;
         for (Jigsaw j : jigsaws) {
             if (j.getCreatedAt().isEqual(minTime)) {
                 os++;

@@ -1,4 +1,4 @@
-package com.xuexian.jigsaw.controller;
+package com.xuexian.jigsaw.controller.user;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.xuexian.jigsaw.dto.CasPageLogin;
@@ -77,21 +77,11 @@ public class AuthController {
     @PostMapping("/login")
     public Result login(@RequestBody LoginFormDTO loginForm) {
         User user = null;
-        try {
-            // 查询用户
-            user = userService.getOne(
-                    Wrappers.<User>lambdaQuery()
-                            .eq(User::getUserName, loginForm.getUserName())
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (user == null) {
-            // 跳转到统一认证
-
-            return Result.error("用户名不存在");
-        }
+        // 查询用户
+        user = userService.getOne(
+                Wrappers.<User>lambdaQuery()
+                        .eq(User::getUserName, loginForm.getUserName())
+        );
 
 
 

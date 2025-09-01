@@ -1,4 +1,4 @@
-package com.xuexian.jigsaw.controller;
+package com.xuexian.jigsaw.controller.user;
 
 import com.xuexian.jigsaw.entity.Jigsaw;
 import com.xuexian.jigsaw.service.IJigsawService;
