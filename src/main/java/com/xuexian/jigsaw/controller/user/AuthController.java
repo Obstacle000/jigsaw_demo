@@ -10,6 +10,9 @@ import com.xuexian.jigsaw.util.JwtUtil;
 import com.xuexian.jigsaw.util.PasswordEncoder;
 import com.xuexian.jigsaw.vo.Result;
 import io.jsonwebtoken.Claims;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 @Slf4j
+@Api(tags = "登录接口")
 public class AuthController {
 
     @Autowired
@@ -37,7 +41,8 @@ public class AuthController {
     @ResponseBody
     @SneakyThrows
     @RequestMapping("/casLogin")
-    public String login(@RequestParam String token, HttpServletResponse response) {
+    @ApiOperation("接受一次token,不用管这个")
+    public String login(@Parameter(name="token", description="学校服务器传来的一次token", required=true) @RequestParam String token, HttpServletResponse response) {
         // 后面挪到service
 
         // 存储在服务器上的key应该和存储在服务器上的key相同
@@ -63,6 +68,8 @@ public class AuthController {
                         .setUpdateTime(LocalDateTime.now())
                         .setLevel(1L); // 默认等级
                 userService.save(user);
+
+                userService.assignRole(user.getId(), "USER");
             }
             response.sendRedirect(CasPageLogin.DEFAULT_FORWARD + "?casId=" + casId);
             return null;
@@ -74,28 +81,32 @@ public class AuthController {
      * @param loginForm
      * @return
      */
+
     @PostMapping("/login")
+    @ApiOperation("用户登录接口")
     public Result login(@RequestBody LoginFormDTO loginForm) {
-        User user = null;
-        // 查询用户
-        user = userService.getOne(
-                Wrappers.<User>lambdaQuery()
-                        .eq(User::getUserName, loginForm.getUserName())
-        );
+        User user = userService.getOne(Wrappers.<User>lambdaQuery()
+                .eq(User::getUserName, loginForm.getUserName()));
 
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
 
-
-        if (!PasswordEncoder.matches( user.getPassword(),loginForm.getPassword())) {
+        if (!PasswordEncoder.matches(user.getPassword(), loginForm.getPassword())) {
             return Result.error("密码错误");
+        }
+
+        // 从数据库获取角色列表
+        List<String> roles = userService.getUserRoles(user.getId());
+        if (roles.isEmpty()) {
+            roles = List.of("USER"); // 默认角色
         }
 
         UserDTO userDTO = new UserDTO(
                 user.getId(),
                 user.getNickName(),
-                List.of("USER") // 暂定,到时候从表拿
+                roles
         );
-
-
 
         // 生成token
         String jwt = JwtUtil.generateToken(user.getId(), user.getUserName(), userDTO.getRoles());

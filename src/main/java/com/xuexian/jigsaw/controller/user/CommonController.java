@@ -16,6 +16,7 @@ import com.xuexian.jigsaw.service.impl.JigsawServiceImpl;
 import com.xuexian.jigsaw.util.AliOssUtil;
 import com.xuexian.jigsaw.util.UserHolder;
 import com.xuexian.jigsaw.vo.Result;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -41,6 +42,7 @@ import static com.xuexian.jigsaw.util.RedisConstants.CURRENT_KEY;
  */
 @RestController
 @RequestMapping("/common")
+@Api(tags = "通用接口")
 @Slf4j
 public class CommonController {
     @Autowired
