@@ -12,6 +12,7 @@ import com.xuexian.jigsaw.vo.Result;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
     @Autowired
@@ -74,11 +76,16 @@ public class AuthController {
      */
     @PostMapping("/login")
     public Result login(@RequestBody LoginFormDTO loginForm) {
-        // 查询用户
-        User user = userService.getOne(
-                Wrappers.<User>lambdaQuery()
-                        .eq(User::getUserName, loginForm.getUserName())
-        );
+        User user = null;
+        try {
+            // 查询用户
+            user = userService.getOne(
+                    Wrappers.<User>lambdaQuery()
+                            .eq(User::getUserName, loginForm.getUserName())
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (user == null) {
             // 跳转到统一认证
@@ -102,6 +109,7 @@ public class AuthController {
 
         // 生成token
         String jwt = JwtUtil.generateToken(user.getId(), user.getUserName(), userDTO.getRoles());
+        log.info("jwt:{}", jwt);
 
         return Result.success(Map.of(
                 "user", userDTO,

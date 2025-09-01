@@ -2,10 +2,12 @@ package com.xuexian.jigsaw.util;
 
 
 import cn.hutool.core.util.RandomUtil;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
-
+@Component
 public class PasswordEncoder {
 
     public static String encode(String password) {

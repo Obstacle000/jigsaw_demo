@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +32,7 @@ public class CommonController {
     private IUserService userService;
 
     @PostMapping("/userUpload")
-    public Result upload(MultipartFile file){
+    public Result upload(@RequestParam("file") MultipartFile file){
         log.info("用户头像上传: {}",file);
         UserDTO userDTO = UserHolder.getUser();
 

@@ -15,15 +15,15 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String token = request.getHeader("Authorization");
+        if (token == null ) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("缺少token");
             return false;
         }
 
         try {
-            String token = authHeader.substring(7);
+
             var claims = JwtUtil.parseToken(token);
 
             UserDTO user = new UserDTO(

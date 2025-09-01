@@ -4,15 +4,14 @@ spring:
   application:
     name: jigsaw
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://121.41.65.114:3306/jigsaw?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://121.41.65.114:3306/jigsaw_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
     username: jigsaw_handler
     password: aH7aN6mS5sG8eF0
   jackson:
     default-property-inclusion: non_null
   data:
     redis:
-      password: 123321
       host: 192.168.194.128
       port: 6379
 alioss:
