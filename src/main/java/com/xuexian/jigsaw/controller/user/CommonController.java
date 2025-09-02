@@ -130,7 +130,7 @@ public class CommonController {
     })
     public Result uploadJigsaw(
              @RequestParam(value="jigsawId", required=false) Long jigsawId,
-             @RequestParam("categoryId") Integer categoryId,
+             @RequestParam(value = "categoryId",required=false) Integer categoryId,
             @RequestParam("title") String title,
             @RequestParam("pieces") Integer pieceCount,
             @RequestParam("background") String background,
@@ -189,27 +189,41 @@ public class CommonController {
 
     /** 上传或更新分类封面 */
     @PostMapping("/categoryUpload")
-    @Operation(summary = "上传或更新分类封面图片")
+    @Operation(summary = "上传或更新分类封面图片，如果分类不存在则新增分类")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "成功" ),
             @ApiResponse(responseCode = "-10", description = "无权限"),
-            @ApiResponse(responseCode = "-10002", description = "分类不存在"),
             @ApiResponse(responseCode = "-20000", description = "封面更新失败"),
             @ApiResponse(responseCode = "-20003", description = "文件上传失败"),
             @ApiResponse(responseCode = "-1", description = "系统未知错误"),
     })
     public Result uploadCategoryCover(
-            @RequestParam("categoryId") Integer categoryId,
+            @RequestParam(value = "categoryId", required = false) Integer categoryId,
+            @RequestParam("name") String name,
             @RequestParam("file") MultipartFile file
     ) {
         if (!isAdmin()) return Result.error(Code.NO_GRANTED, "无权限");
 
-        Category category = categoryMapper.selectById(categoryId);
-        if (category == null) return Result.error(Code.CLASSIFICATION_NOT_EXIST, "分类不存在");
-
         try {
+            Category category = null;
+
+            // 判断分类是否存在
+            if (categoryId != null) {
+                category = categoryMapper.selectById(categoryId);
+            }
+
+            // 不存在则新增
+            if (category == null) {
+                category = new Category();
+                category.setName(name);
+                categoryMapper.insert(category);
+                categoryId = category.getCategoryId(); // 获取数据库生成的ID
+            }
+
+            // 上传封面图片
             String url = ossUtil.upload(file.getBytes(), "category_" + categoryId + "_" + file.getOriginalFilename());
 
+            // 更新封面字段
             boolean updated = categoryService.lambdaUpdate()
                     .eq(Category::getCategoryId, categoryId)
                     .set(Category::getCover, url)
@@ -226,6 +240,8 @@ public class CommonController {
             return Result.error(Code.SYSTEM_UNKNOWN_ERR, "系统未知错误");
         }
     }
+
+
 
     /** 上传或更新拼图背景 */
     @PostMapping("/uploadBackground")
