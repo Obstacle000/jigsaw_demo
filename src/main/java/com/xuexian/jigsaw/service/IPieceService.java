@@ -15,7 +15,7 @@ public interface IPieceService extends IService<Piece> {
 
     Result reset(Long jigsawId, Long userId);
 
-    Result saveOrComplete(Long jigsawId, Long userId, String piecesJson);
+    Result saveOrComplete(Long jigsawId, String piecesJson);
 
-    Result getCurrentPieces(Long jigsawId, Long userId);
+    Result getCurrentPieces(Long jigsawId);
 }

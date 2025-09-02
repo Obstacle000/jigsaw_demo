@@ -1,22 +1,31 @@
 package com.xuexian.jigsaw.controller.user;
 
+import com.xuexian.jigsaw.dto.UserDTO;
 import com.xuexian.jigsaw.util.UserHolder;
 import com.xuexian.jigsaw.vo.Result;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.xuexian.jigsaw.util.Code.REQUEST_SUCCESS;
+
 @RestController
 @RequestMapping("/api")
-@Api(tags = "用户信息相关接口")
+@Tag(name = "用户信息相关接口", description = "获取当前登录用户的信息接口")
 public class ApiController {
 
     @GetMapping("/me")
-    @ApiOperation("新获取用户信息")
-    public Result me() {
+    @Operation(summary = "获取当前用户信息", description = "返回当前登录用户的详细信息")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "成功")
+    })
+    public Result<UserDTO> me() {
         // 拦截器里已经放好了
-        return Result.success(UserHolder.getUser());
+        return Result.success(REQUEST_SUCCESS, UserHolder.getUser());
     }
 }

@@ -1,19 +1,24 @@
 server:
   port: 8081
+
 spring:
   application:
     name: jigsaw
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://121.41.65.114:3306/jigsaw_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
     username: jigsaw_handler
     password: aH7aN6mS5sG8eF0
+
   jackson:
     default-property-inclusion: non_null
+
   data:
     redis:
       host: 192.168.194.128
       port: 6379
+
 alioss:
   endpoint: oss-cn-beijing.aliyuncs.com
   access-key-id: ${OSS_ACCESS_KEY_ID}
@@ -22,6 +27,21 @@ alioss:
 
 mybatis-plus:
   type-aliases-package: com.xuexian.entity
+
 logging:
   level:
     com.hmdp: debug
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    display-request-duration: true
+    default-model-rendering: example
+  packages-to-scan: com.xuexian.jigsaw.controller
+  info:
+    title: "拼图文档"
+    description: "拼图文档"
+    version: "v1.0.0"

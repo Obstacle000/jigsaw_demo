@@ -8,6 +8,7 @@ public class RedisConstants {
 
     public static final String CURRENT_KEY = "jigsaw:%d:user:%d:current";
     public static final String HISTORY_KEY = "jigsaw:%d:user:%d:history";
+    public static final String INITIAL_KEY = "jigsaw:%d:user:%d:initial";
 
 
 

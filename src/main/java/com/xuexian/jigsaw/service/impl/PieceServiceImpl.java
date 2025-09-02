@@ -10,6 +10,7 @@ import com.xuexian.jigsaw.mapper.JigsawMapper;
 import com.xuexian.jigsaw.mapper.PieceMapper;
 import com.xuexian.jigsaw.mapper.RecordMapper;
 import com.xuexian.jigsaw.service.IPieceService;
+import com.xuexian.jigsaw.util.UserHolder;
 import com.xuexian.jigsaw.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xuexian.jigsaw.util.Code.JIGSAW_UNDO_FAIL;
-import static com.xuexian.jigsaw.util.RedisConstants.CURRENT_KEY;
-import static com.xuexian.jigsaw.util.RedisConstants.HISTORY_KEY;
+import static com.xuexian.jigsaw.util.Code.REQUEST_SUCCESS;
+import static com.xuexian.jigsaw.util.RedisConstants.*;
 
 @Service
 public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements IPieceService {
@@ -60,7 +61,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
         // 从历史栈取出上一步状态
         String lastState = stringRedisTemplate.opsForList().rightPop(historyKey);
         if (lastState == null) {
-            throw new BusinessException(JIGSAW_UNDO_FAIL, "已经是初始状态，无法撤销");
+            return Result.error(JIGSAW_UNDO_FAIL,"拼图撤销失败");
         }
 
         // 更新当前状态
@@ -76,7 +77,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
         response.put("pieces", pieces);
         response.put("progress", progress);
 
-        return Result.success(response);
+        return Result.success(REQUEST_SUCCESS,response);
     }
 
     /**
@@ -107,7 +108,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
         response.put("pieces", pieces);
         response.put("progress", 0); // 重来后进度为0%
 
-        return Result.success(response);
+        return Result.success(REQUEST_SUCCESS,response);
     }
 
     private String getInitialJigsawState(Long jigsawId) {
@@ -134,7 +135,8 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
     }
 
     @Override
-    public Result saveOrComplete(Long jigsawId, Long userId, String piecesJson) {
+    public Result saveOrComplete(Long jigsawId, String piecesJson) {
+        Long userId = UserHolder.getUser().getId();
         String currentKey = String.format(CURRENT_KEY, jigsawId, userId);
         String historyKey = String.format(HISTORY_KEY, jigsawId, userId);
 
@@ -174,7 +176,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
             response.put("background", getJigsawBackground(jigsawId));
         }
 
-        return Result.success(response);
+        return Result.success(REQUEST_SUCCESS,response);
     }
 
 
@@ -187,38 +189,34 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
     }
 
     @Override
-    public Result getCurrentPieces(Long jigsawId, Long userId) {
-        String currentKey = String.format(CURRENT_KEY, jigsawId, userId);
-        String historyKey = String.format(HISTORY_KEY, jigsawId, userId);
+    public Result getCurrentPieces(Long jigsawId) {
+        Long id = UserHolder.getUser().getId();
+        String userKey = String.format(CURRENT_KEY, jigsawId, id);
+        String historyKey = String.format(HISTORY_KEY, jigsawId, id);
 
-        // 尝试从 Redis 获取当前状态
-        String currentStateJson = stringRedisTemplate.opsForValue().get(currentKey);
-
-        List<Map<String, Object>> pieces;
-        int progress;
-
-        if (currentStateJson != null) {
-            // 用户之前玩过，从 Redis 获取状态
-            pieces = JSONUtil.toBean(currentStateJson, List.class);
-            long total = pieces.size();
-            long placedCount = pieces.stream().filter(p -> Boolean.TRUE.equals(p.get("placed"))).count();
-            progress = (int) (placedCount * 100 / total);
-        } else {
-            // 用户第一次进入，从数据库获取初始状态
-            String initialStateJson = getInitialJigsawState(jigsawId);
-            pieces = JSONUtil.toBean(initialStateJson, List.class);
-
-            // 写入 Redis 的当前状态，但不操作历史栈
-            stringRedisTemplate.opsForValue().set(currentKey, initialStateJson);
-
-            progress = 0;
+        // 尝试从 Redis 获取用户状态
+        String currentStateJson = stringRedisTemplate.opsForValue().get(userKey);
+        if (currentStateJson == null) {
+            // 用户第一次玩，从模板复制
+            String initKey = String.format(INITIAL_KEY, jigsawId, 0L);
+            currentStateJson = stringRedisTemplate.opsForValue().get(initKey);
+            if (currentStateJson == null) {
+                // 模板不存在，从数据库生成
+                currentStateJson = getInitialJigsawState(jigsawId);
+            }
+            stringRedisTemplate.opsForValue().set(userKey, currentStateJson);
         }
+
+        List<Map<String, Object>> pieces = JSONUtil.toBean(currentStateJson, List.class);
+        long total = pieces.size();
+        long placedCount = pieces.stream().filter(p -> Boolean.TRUE.equals(p.get("placed"))).count();
+        int progress = (int)(placedCount * 100 / total);
 
         Map<String, Object> response = new HashMap<>();
         response.put("pieces", pieces);
         response.put("progress", progress);
 
-        return Result.success(response);
+        return Result.success(REQUEST_SUCCESS, response);
     }
 
 
