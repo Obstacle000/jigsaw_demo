@@ -44,7 +44,7 @@ public class PieceController {
     public Result saveOrComplete(
             @Parameter(description = "拼图ID", required = true) @PathVariable Long jigsawId,
             @Parameter(description = "当前拼图块状态 JSON", required = true) @RequestBody String piecesJson) {
-        Long userId = UserHolder.getUser().getId();
+
         return pieceService.saveOrComplete(jigsawId, piecesJson);
     }
 
@@ -55,7 +55,6 @@ public class PieceController {
     })
     public Result getCurrentPieces(
             @Parameter(description = "拼图ID", required = true) @RequestParam Long jigsawId) {
-        Long userId = UserHolder.getUser().getId();
         return pieceService.getCurrentPieces(jigsawId);
     }
 

@@ -57,7 +57,7 @@ public class AuthController {
                 user = new User()
                         .setUserName(casId)
                         .setPassword(PasswordEncoder.encode(casId))
-                        .setNickName("用户" + casId)
+                        .setNickName("用户_" + casId)
                         .setCreateTime(LocalDateTime.now())
                         .setUpdateTime(LocalDateTime.now())
                         .setLevel(1L);

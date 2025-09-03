@@ -156,6 +156,8 @@ public class CommonController {
                 jigsaw.setCreatedAt(LocalDateTime.now());
                 jigsawMapper.updateById(jigsaw);
 
+                splitAndSavePieces(jigsaw, file, pieceCount, category);
+
                 return Result.success(Code.REQUEST_SUCCESS, "拼图更新成功");
             } else {
                 // 新增逻辑

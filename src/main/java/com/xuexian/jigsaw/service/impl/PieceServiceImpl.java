@@ -53,7 +53,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
      * @param userId
      * @return
      */
-    @Override
+    /*@Override
     public Result undo(Long jigsawId, Long userId) {
         String historyKey = String.format(HISTORY_KEY, jigsawId, userId);
         String currentKey = String.format(CURRENT_KEY, jigsawId, userId);
@@ -78,15 +78,14 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
         response.put("progress", progress);
 
         return Result.success(REQUEST_SUCCESS,response);
-    }
+    }*/
 
     /**
      * 拼图重来
      * @param jigsawId
-     * @param userId
      * @return
      */
-    @Override
+    /*@Override
     public Result reset(Long jigsawId, Long userId) {
         String currentKey = String.format(CURRENT_KEY, jigsawId, userId);
         String historyKey = String.format(HISTORY_KEY, jigsawId, userId);
@@ -109,8 +108,9 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
         response.put("progress", 0); // 重来后进度为0%
 
         return Result.success(REQUEST_SUCCESS,response);
-    }
+    }*/
 
+    // 从数据库获取去模板json
     private String getInitialJigsawState(Long jigsawId) {
         // 查询数据库获取该拼图的所有拼图块
         List<Piece> pieces = listByJigsawId(jigsawId.intValue());
@@ -152,8 +152,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
         // 保存当前状态到 Redis
         stringRedisTemplate.opsForValue().set(currentKey, piecesJson);
 
-        // 历史栈压入
-        stringRedisTemplate.opsForList().rightPush(historyKey, piecesJson);
+
 
         Map<String, Object> response = new HashMap<>();
         response.put("pieces", pieces);

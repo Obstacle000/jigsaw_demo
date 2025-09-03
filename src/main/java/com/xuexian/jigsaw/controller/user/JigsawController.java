@@ -52,6 +52,7 @@ public class JigsawController {
         return Result.success(REQUEST_SUCCESS, result);
     }
 
+
     @GetMapping("/{jigsawId}/full-image")
     @Operation(summary = "获取完整拼图图片", description = "根据拼图ID返回拼图完整图片URL")
     @ApiResponses({
