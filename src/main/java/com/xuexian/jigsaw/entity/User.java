@@ -48,9 +48,6 @@ public class User implements Serializable {
     @Schema(description = "用户等级", example = "3")
     private Long level = 1L;
 
-    @TableLogic
-    @Schema(description = "删除时间（为空表示未删除）")
-    private LocalDateTime deletedAt;
 
     @TableField(exist = false)
     @Schema(description = "用户角色列表")

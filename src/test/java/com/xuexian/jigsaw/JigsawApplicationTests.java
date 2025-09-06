@@ -12,7 +12,7 @@ class JigsawApplicationTests {
     @Test
     void test() {
 
-        System.out.println(passwordEncoder.encode("10000"));
+        System.out.println(passwordEncoder.encode("202400300169"));
     }
 
 }
