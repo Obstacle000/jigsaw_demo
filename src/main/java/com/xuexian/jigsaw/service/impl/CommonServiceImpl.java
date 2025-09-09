@@ -244,7 +244,7 @@ public class CommonServiceImpl implements CommonService {
         }
 
         // 存 Redis 模板
-        String templateKey = INITIAL_KEY ; // 例如 jigsaw_initial_123
+        String templateKey = String.format(INITIAL_KEY, jigsaw.getId(), 0L);
         stringRedisTemplate.opsForValue().set(templateKey, JSONUtil.toJsonStr(initialPieces));
     }
 
