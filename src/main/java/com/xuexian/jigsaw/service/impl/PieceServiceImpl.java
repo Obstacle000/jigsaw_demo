@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xuexian.jigsaw.util.Code.JIGSAW_UNDO_FAIL;
 import static com.xuexian.jigsaw.util.Code.REQUEST_SUCCESS;
@@ -111,21 +108,25 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
     }*/
 
     // 从数据库获取去模板json
+    // 从数据库获取拼图模板 JSON（随机位置）
     private String getInitialJigsawState(Long jigsawId) {
         // 查询数据库获取该拼图的所有拼图块
         List<Piece> pieces = listByJigsawId(jigsawId.intValue());
 
         List<Map<String, Object>> initialPieces = new ArrayList<>();
-        int startX = 10; // 待拖动区起始 X 坐标
-        int startY = 500; // 待拖动区 Y 坐标
-        int gap = 100; // 每个拼图块水平间隔
 
-        for (int i = 0; i < pieces.size(); i++) {
-            Piece p = pieces.get(i);
+        // 随机位置范围（请根据前端画布范围调整）
+        int minX = 50;   // 最小 X
+        int maxX = 800;  // 最大 X
+        int minY = 400;  // 最小 Y
+        int maxY = 800;  // 最大 Y
+        Random random = new Random();
+
+        for (Piece p : pieces) {
             Map<String, Object> map = new HashMap<>();
             map.put("pieceNumber", p.getPieceNumber());
-            map.put("x", startX + i * gap); // 每个拼图块水平错开
-            map.put("y", startY); // 同一行
+            map.put("x", minX + random.nextInt(maxX - minX + 1)); // 随机 X
+            map.put("y", minY + random.nextInt(maxY - minY + 1)); // 随机 Y
             map.put("placed", false);
             map.put("url", p.getUrl());
             initialPieces.add(map);
@@ -133,6 +134,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
 
         return JSONUtil.toJsonStr(initialPieces);
     }
+
 
     @Override
     public Result saveOrComplete(Long jigsawId, String piecesJson) {
@@ -191,7 +193,6 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
     public Result getCurrentPieces(Long jigsawId) {
         Long id = UserHolder.getUser().getId();
         String userKey = String.format(CURRENT_KEY, jigsawId, id);
-        String historyKey = String.format(HISTORY_KEY, jigsawId, id);
 
         // 尝试从 Redis 获取用户状态
         String currentStateJson = stringRedisTemplate.opsForValue().get(userKey);

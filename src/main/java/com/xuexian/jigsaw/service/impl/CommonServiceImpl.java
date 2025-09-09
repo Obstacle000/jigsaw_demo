@@ -26,10 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xuexian.jigsaw.util.RedisConstants.INITIAL_KEY;
 
@@ -194,9 +191,13 @@ public class CommonServiceImpl implements CommonService {
         int pieceHeight = image.getHeight() / rows;
 
         List<Map<String, Object>> initialPieces = new ArrayList<>();
-        int startX = 10; // 待拖动区起始 X
-        int startY = 500; // 待拖动区起始 Y
-        int gap = 100; // 水平间隔
+
+        // 随机位置范围（根据你的前端画布大小自定义）
+        int minX = 50;
+        int maxX = 800;
+        int minY = 400;
+        int maxY = 800;
+        Random random = new Random();
 
         int pieceNumber = 1;
         for (int y = 0; y < rows; y++) {
@@ -225,11 +226,15 @@ public class CommonServiceImpl implements CommonService {
                 piece.setUpdatedAt(LocalDateTime.now());
                 pieceMapper.insert(piece);
 
+                // 生成随机初始位置
+                int randomX = minX + random.nextInt(maxX - minX + 1);
+                int randomY = minY + random.nextInt(maxY - minY + 1);
+
                 // 构建初始状态 JSON
                 Map<String, Object> map = new HashMap<>();
                 map.put("pieceNumber", pieceNumber);
-                map.put("x", startX + (pieceNumber - 1) * gap);
-                map.put("y", startY);
+                map.put("x", randomX);
+                map.put("y", randomY);
                 map.put("placed", false);
                 map.put("url", pieceUrl);
                 initialPieces.add(map);
@@ -238,8 +243,8 @@ public class CommonServiceImpl implements CommonService {
             }
         }
 
-        // 存 Redis 模板 key，userId=0，用户第一次玩时复制到自己的 key
-        String templateKey = String.format(INITIAL_KEY, jigsaw.getId(), 0L);
+        // 存 Redis 模板
+        String templateKey = INITIAL_KEY ; // 例如 jigsaw_initial_123
         stringRedisTemplate.opsForValue().set(templateKey, JSONUtil.toJsonStr(initialPieces));
     }
 
