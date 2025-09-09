@@ -142,7 +142,6 @@ public class CommonServiceImpl implements CommonService {
                 jigsaw.setPieceCount(pieceCount);
                 jigsaw.setBackground(background);
                 jigsaw.setUrl(fullUrl);
-                jigsaw.setCreatedAt(LocalDateTime.now());
                 jigsawMapper.updateById(jigsaw);
 
                 splitAndSavePieces(jigsaw, file, pieceCount, category);

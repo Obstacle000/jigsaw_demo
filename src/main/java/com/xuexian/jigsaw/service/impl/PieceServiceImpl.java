@@ -166,7 +166,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
         } else {
             // 拼图完成，记录完成到 record 表
             Record record = new Record();
-            record.setId(userId.intValue());
+            record.setUserId(userId.intValue());
             record.setJigsawId(jigsawId.intValue());
             record.setCreatedAt(LocalDateTime.now());
             record.setUpdatedAt(LocalDateTime.now());
