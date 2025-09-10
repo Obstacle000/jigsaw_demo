@@ -1,5 +1,6 @@
 package com.xuexian.jigsaw.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -15,9 +16,9 @@ import lombok.NoArgsConstructor;
 @Schema(description = "分类实体，包含分类基础信息和用户进度统计")
 public class Category {
 
-    @TableId
+    @TableId(type = IdType.AUTO)
     @Schema(description = "分类ID", example = "1")
-    private Integer categoryId;     // 分类ID
+    private Integer id;     // 分类ID
 
     @Schema(description = "分类名称", example = "世界名画拼图")
     private String name;            // 分类名称

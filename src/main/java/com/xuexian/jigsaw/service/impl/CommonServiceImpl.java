@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -83,6 +84,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    @Transactional
     public Result uploadCategoryCover(Integer categoryId, String name, MultipartFile file) {
         if (!isAdmin()) return Result.error(Code.NO_GRANTED, "无权限");
 
@@ -99,7 +101,7 @@ public class CommonServiceImpl implements CommonService {
                 category = new Category();
                 category.setName(name);
                 categoryMapper.insert(category);
-                categoryId = category.getCategoryId(); // 获取数据库生成的ID
+                categoryId = category.getId(); // 获取数据库生成的ID
             }
 
             // 上传封面图片
@@ -107,7 +109,7 @@ public class CommonServiceImpl implements CommonService {
 
             // 更新封面字段
             boolean updated = categoryService.lambdaUpdate()
-                    .eq(Category::getCategoryId, categoryId)
+                    .eq(Category::getId, categoryId)
                     .set(Category::getCover, url)
                     .update();
 
@@ -129,6 +131,7 @@ public class CommonServiceImpl implements CommonService {
 
         // 校验分类
         Category category = categoryMapper.selectById(categoryId);
+        category.setTotal(category.getTotal() + 1);
         if (category == null) return Result.error(Code.CLASSIFICATION_NOT_EXIST, "分类不存在");
 
         try {

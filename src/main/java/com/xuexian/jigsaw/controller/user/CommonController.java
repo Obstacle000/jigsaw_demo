@@ -119,7 +119,7 @@ public class CommonController {
     })
     public Result uploadJigsaw(
              @RequestParam(value="jigsawId", required=false) Long jigsawId,
-             @RequestParam(value = "categoryId",required=false) Integer categoryId,
+             @RequestParam(value = "categoryId") Integer categoryId,
             @RequestParam("title") String title,
             @RequestParam("pieces") Integer pieceCount,
             @RequestParam("background") String background,
