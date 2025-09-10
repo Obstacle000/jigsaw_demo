@@ -154,23 +154,23 @@ public class CommonController {
 
 
 
-    /** 上传或更新拼图背景 */
-    @PostMapping("/uploadBackground")
-    @Operation(summary = "上传或更新拼图背景图片")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "成功"),
-            @ApiResponse(responseCode = "-10", description = "无权限"),
-            @ApiResponse(responseCode = "-10003", description = "拼图不存在"),
-            @ApiResponse(responseCode = "-20001", description = "背景更新失败"),
-            @ApiResponse(responseCode = "-20003", description = "文件上传失败"),
-            @ApiResponse(responseCode = "-1", description = "系统未知错误"),
-    })
-    public Result uploadJigsawBackground(
-            @RequestParam("jigsawId") Long jigsawId,
-             @RequestParam("file") MultipartFile file) {
-
-        return commonService.uploadJigsawBackground(jigsawId,file);
-
-    }
+//    /** 上传或更新拼图背景 */
+//    @PostMapping("/uploadBackground")
+//    @Operation(summary = "上传或更新拼图背景图片")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "成功"),
+//            @ApiResponse(responseCode = "-10", description = "无权限"),
+//            @ApiResponse(responseCode = "-10003", description = "拼图不存在"),
+//            @ApiResponse(responseCode = "-20001", description = "背景更新失败"),
+//            @ApiResponse(responseCode = "-20003", description = "文件上传失败"),
+//            @ApiResponse(responseCode = "-1", description = "系统未知错误"),
+//    })
+//    public Result uploadJigsawBackground(
+//            @RequestParam("jigsawId") Long jigsawId,
+//             @RequestParam("file") MultipartFile file) {
+//
+//        return commonService.uploadJigsawBackground(jigsawId,file);
+//
+//    }
 
 }
