@@ -182,7 +182,6 @@ public class CommonServiceImpl implements CommonService {
     /** 切分拼图块方法 */
     /** 切分拼图块方法，同时生成初始状态存 Redis */
     private void splitAndSavePieces(Jigsaw jigsaw, MultipartFile file, int pieceCount, Category category) throws IOException {
-        Long id = UserHolder.getUser().getId();
         BufferedImage image = ImageIO.read(file.getInputStream());
         int rows = (int) Math.sqrt(pieceCount);
         int cols = (int) Math.ceil((double) pieceCount / rows);
@@ -191,22 +190,16 @@ public class CommonServiceImpl implements CommonService {
 
         List<Map<String, Object>> initialPieces = new ArrayList<>();
 
-        // 随机位置范围（根据你的前端画布大小自定义）
-        int minX = 50;
-        int maxX = 800;
-        int minY = 400;
-        int maxY = 800;
-        Random random = new Random();
-
         int pieceNumber = 1;
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < cols; x++) {
+        for (int row = 1; row <= rows; row++) {
+            for (int col = 1; col <= cols; col++) {
                 if (pieceNumber > pieceCount) break;
 
                 BufferedImage subImage = image.getSubimage(
-                        x * pieceWidth, y * pieceHeight,
-                        Math.min(pieceWidth, image.getWidth() - x * pieceWidth),
-                        Math.min(pieceHeight, image.getHeight() - y * pieceHeight)
+                        (col - 1) * pieceWidth,
+                        (row - 1) * pieceHeight,
+                        Math.min(pieceWidth, image.getWidth() - (col - 1) * pieceWidth),
+                        Math.min(pieceHeight, image.getHeight() - (row - 1) * pieceHeight)
                 );
 
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -225,22 +218,24 @@ public class CommonServiceImpl implements CommonService {
                 piece.setUpdatedAt(LocalDateTime.now());
                 pieceMapper.insert(piece);
 
-                // 生成随机初始位置
-                int randomX = minX + random.nextInt(maxX - minX + 1);
-                int randomY = minY + random.nextInt(maxY - minY + 1);
-
                 // 构建初始状态 JSON
                 Map<String, Object> map = new HashMap<>();
                 map.put("pieceNumber", pieceNumber);
-                map.put("x", randomX);
-                map.put("y", randomY);
+                map.put("x", 0); // 初始未拼上
+                map.put("y", 0); // 初始未拼上
                 map.put("placed", false);
                 map.put("url", pieceUrl);
-                initialPieces.add(map);
+                // 可选：记录正确位置方便判断
+                map.put("correctX", col); // 表格列坐标
+                map.put("correctY", row); // 表格行坐标
 
+                initialPieces.add(map);
                 pieceNumber++;
             }
         }
+
+        // 打乱顺序
+        Collections.shuffle(initialPieces);
 
         // 存 Redis 模板
         String templateKey = String.format(INITIAL_KEY, jigsaw.getId(), 0L);

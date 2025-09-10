@@ -109,31 +109,42 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
 
     // 从数据库获取去模板json
     // 从数据库获取拼图模板 JSON（随机位置）
+    // 从数据库获取拼图模板 JSON（正确位置+打乱顺序）
     private String getInitialJigsawState(Long jigsawId) {
         // 查询数据库获取该拼图的所有拼图块
         List<Piece> pieces = listByJigsawId(jigsawId.intValue());
 
         List<Map<String, Object>> initialPieces = new ArrayList<>();
 
-        // 随机位置范围（请根据前端画布范围调整）
-        int minX = 50;   // 最小 X
-        int maxX = 800;  // 最大 X
-        int minY = 400;  // 最小 Y
-        int maxY = 800;  // 最大 Y
-        Random random = new Random();
+        // 假设 rows/cols 根据拼图块数量自动推算
+        int pieceCount = pieces.size();
+        int rows = (int) Math.sqrt(pieceCount);
+        int cols = (int) Math.ceil((double) pieceCount / rows);
 
+        // 根据拼图块序号推算出每块的正确行列坐标
         for (Piece p : pieces) {
+            int pieceNumber = p.getPieceNumber();
+            // 假设 pieceNumber 从 1 开始
+            int correctRow = (pieceNumber - 1) / cols + 1; // 行
+            int correctCol = (pieceNumber - 1) % cols + 1; // 列
+
             Map<String, Object> map = new HashMap<>();
-            map.put("pieceNumber", p.getPieceNumber());
-            map.put("x", minX + random.nextInt(maxX - minX + 1)); // 随机 X
-            map.put("y", minY + random.nextInt(maxY - minY + 1)); // 随机 Y
+            map.put("pieceNumber", pieceNumber);
+            map.put("x", 0); // 初始未拼上，统一 (0,0)
+            map.put("y", 0);
+            map.put("correctX", correctRow); // 表格坐标
+            map.put("correctY", correctCol);
             map.put("placed", false);
             map.put("url", p.getUrl());
             initialPieces.add(map);
         }
 
+        // 打乱顺序
+        Collections.shuffle(initialPieces);
+
         return JSONUtil.toJsonStr(initialPieces);
     }
+
 
 
     @Override
