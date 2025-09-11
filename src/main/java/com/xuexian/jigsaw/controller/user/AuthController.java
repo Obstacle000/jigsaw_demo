@@ -60,7 +60,7 @@ public class AuthController {
         if (user == null) {
             user = new User()
                     .setUserName(casId)
-                    .setPassword(PasswordEncoder.encode(casId)) // 你说先不用管密码安全
+                    .setPassword(PasswordEncoder.encode(casId))
                     .setNickName("用户_" + casId)
                     .setCreateTime(LocalDateTime.now())
                     .setUpdateTime(LocalDateTime.now())
