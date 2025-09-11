@@ -37,6 +37,12 @@ public class Jigsaw {
     @Schema(description = "拼图创建时间", example = "2025-09-02T15:30:00")
     private LocalDateTime createdAt;
 
+    @Schema(description = "拼图删除时间", example = "2025-09-02T15:30:00")
+    private LocalDateTime deletedAt;
+
+    @Schema(description = "拼图更新时间", example = "2025-09-02T15:30:00")
+    private LocalDateTime updatedAt;
+
     @Schema(description = "拼图文件URL", example = "https://example.com/jigsaw.zip")
     private String url;
 

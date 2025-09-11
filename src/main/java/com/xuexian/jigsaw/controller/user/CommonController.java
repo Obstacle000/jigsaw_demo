@@ -152,6 +152,32 @@ public class CommonController {
 
     }
 
+    /** 删除拼图 */
+    @PostMapping("/deleteJigsaw")
+    @Operation(summary = "删除拼图（及其所有拼图块）")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "成功" ),
+            @ApiResponse(responseCode = "-10", description = "无权限"),
+            @ApiResponse(responseCode = "-10003", description = "拼图不存在"),
+            @ApiResponse(responseCode = "-1", description = "系统未知错误"),
+    })
+    public Result deleteJigsaw(@RequestParam("jigsawId") Long jigsawId) {
+        return commonService.deleteJigsaw(jigsawId);
+    }
+
+    /** 删除分类 */
+    @PostMapping("/deleteCategory")
+    @Operation(summary = "删除分类（及其所有拼图和拼图块）")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "成功" ),
+            @ApiResponse(responseCode = "-10", description = "无权限"),
+            @ApiResponse(responseCode = "-10002", description = "分类不存在"),
+            @ApiResponse(responseCode = "-1", description = "系统未知错误"),
+    })
+    public Result deleteCategory(@RequestParam("categoryId") Integer categoryId) {
+        return commonService.deleteCategory(categoryId);
+    }
+
 
 
 //    /** 上传或更新拼图背景 */

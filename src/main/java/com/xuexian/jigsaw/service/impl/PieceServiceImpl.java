@@ -10,6 +10,7 @@ import com.xuexian.jigsaw.mapper.JigsawMapper;
 import com.xuexian.jigsaw.mapper.PieceMapper;
 import com.xuexian.jigsaw.mapper.RecordMapper;
 import com.xuexian.jigsaw.service.IPieceService;
+import com.xuexian.jigsaw.util.Code;
 import com.xuexian.jigsaw.util.UserHolder;
 import com.xuexian.jigsaw.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,7 +157,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
         String historyKey = String.format(HISTORY_KEY, jigsawId, userId);
 
         // 解析拼图块状态
-        List<Map<String, Object>> pieces = JSONUtil.toBean(piecesJson, List.class);
+        List<Map> pieces = JSONUtil.toList(piecesJson, Map.class);
 
         long total = pieces.size();
         long placedCount = pieces.stream().filter(p -> Boolean.TRUE.equals(p.get("placed"))).count();
@@ -205,6 +206,10 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
     @Override
     @Transactional
     public Result getCurrentPieces(Long jigsawId) {
+        Jigsaw jigsaw = jigsawMapper.selectById(jigsawId);
+        if (jigsaw.getDeletedAt() != null) {
+            return Result.error(Code.JIGSAW_NOT_EXIST,"拼图不存在");
+        }
         Long id = UserHolder.getUser().getId();
         String userKey = String.format(CURRENT_KEY, jigsawId, id);
 
@@ -221,7 +226,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
             stringRedisTemplate.opsForValue().set(userKey, currentStateJson);
         }
 
-        List<Map<String, Object>> pieces = JSONUtil.toBean(currentStateJson, List.class);
+        List<Map> pieces  = JSONUtil.toList(currentStateJson, Map.class);
         long total = pieces.size();
         long placedCount = pieces.stream().filter(p -> Boolean.TRUE.equals(p.get("placed"))).count();
         int progress = (int)(placedCount * 100 / total);

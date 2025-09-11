@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,6 +34,16 @@ public class Category {
     @TableField(exist = false)
     @Schema(description = "用户已完成拼图数", example = "5")
     private Integer finishedCount;  // 用户已完成拼图数
+
+    @Schema(description = "分类创建时间", example = "2025-09-02T15:30:00")
+    private LocalDateTime createdAt;
+
+    @Schema(description = "分类删除时间", example = "2025-09-02T15:30:00")
+    private LocalDateTime deletedAt;
+
+    @Schema(description = "分类更新时间", example = "2025-09-02T15:30:00")
+    private LocalDateTime updatedAt;
+
 
     @TableField(exist = false)
     @Schema(description = "用户完成度百分比", example = "0.25")

@@ -37,7 +37,7 @@ public class Piece {
     @Schema(description = "更新时间", example = "2025-09-02T15:40:00")
     private LocalDateTime updatedAt;
 
-    @TableLogic
+
     @Schema(description = "删除时间（为空表示未删除）", example = "null")
     private LocalDateTime deletedAt;
 }

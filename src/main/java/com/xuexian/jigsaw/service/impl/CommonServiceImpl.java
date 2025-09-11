@@ -2,6 +2,7 @@ package com.xuexian.jigsaw.service.impl;
 
 import cn.hutool.core.img.ImgUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xuexian.jigsaw.dto.UserDTO;
 import com.xuexian.jigsaw.entity.Category;
 import com.xuexian.jigsaw.entity.Jigsaw;
@@ -147,6 +148,7 @@ public class CommonServiceImpl implements CommonService {
                 jigsaw.setPieceCount(pieceCount);
                 jigsaw.setBackground(background);
                 jigsaw.setUrl(fullUrl);
+                jigsaw.setUpdatedAt(LocalDateTime.now());
                 jigsawMapper.updateById(jigsaw);
 
                 splitAndSavePieces(jigsaw, file, pieceCount, category);
@@ -178,14 +180,18 @@ public class CommonServiceImpl implements CommonService {
         }
     }
 
-    /** 判断是否管理员 */
+    /**
+     * 判断是否管理员
+     */
     private boolean isAdmin() {
         UserDTO user = UserHolder.getUser();
         return user != null && Boolean.TRUE.equals(user.isAdmin());
     }
 
     /** 切分拼图块方法 */
-    /** 切分拼图块方法，同时生成初始状态存 Redis */
+    /**
+     * 切分拼图块方法，同时生成初始状态存 Redis
+     */
     private void splitAndSavePieces(Jigsaw jigsaw, MultipartFile file, int pieceCount, Category category) throws IOException {
         BufferedImage image = ImageIO.read(file.getInputStream());
         int rows = (int) Math.sqrt(pieceCount);
@@ -247,4 +253,68 @@ public class CommonServiceImpl implements CommonService {
         stringRedisTemplate.opsForValue().set(templateKey, JSONUtil.toJsonStr(initialPieces));
     }
 
+    @Override
+    @Transactional
+    public Result deleteJigsaw(Long jigsawId) {
+        Jigsaw jigsaw = jigsawMapper.selectById(jigsawId);
+        if (jigsaw == null || jigsaw.getDeletedAt() != null) {
+            return Result.error(Code.JIGSAW_NOT_EXIST, "拼图不存在或已删除");
+        }
+
+        // 校验分类
+        Category category = categoryMapper.selectById(jigsaw.getCategoryId());
+        category.setTotal(category.getTotal() - 1);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 标记拼图为已删除
+        jigsaw.setDeletedAt(now);
+        jigsaw.setUpdatedAt(now);
+        jigsawMapper.updateById(jigsaw);
+
+        // 标记拼图下的拼图块为已删除
+        List<Piece> pieces = pieceMapper.selectList(new QueryWrapper<Piece>().eq("jigsaw_id", jigsawId));
+        for (Piece piece : pieces) {
+            piece.setDeletedAt(now);
+            piece.setUpdatedAt(now);
+            pieceMapper.updateById(piece);
+        }
+
+        return Result.success(Code.REQUEST_SUCCESS, "拼图删除成功");
+    }
+
+    @Override
+    @Transactional
+    public Result deleteCategory(Integer categoryId) {
+        Category category = categoryMapper.selectById(categoryId);
+        if (category == null || category.getDeletedAt() != null) {
+            return Result.error(Code.CLASSIFICATION_NOT_EXIST, "分类不存在或已删除");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 标记分类为已删除
+        category.setDeletedAt(now);
+        category.setUpdatedAt(now);
+        categoryMapper.updateById(category);
+
+        // 找到该分类下的所有拼图
+        List<Jigsaw> jigsaws = jigsawMapper.selectList(new QueryWrapper<Jigsaw>().eq("category_id", categoryId));
+        for (Jigsaw jigsaw : jigsaws) {
+            jigsaw.setDeletedAt(now);
+            jigsaw.setUpdatedAt(now);
+            jigsawMapper.updateById(jigsaw);
+
+            // 删除拼图下的拼图块
+            List<Piece> pieces = pieceMapper.selectList(new QueryWrapper<Piece>().eq("jigsaw_id", jigsaw.getId()));
+            for (Piece piece : pieces) {
+                piece.setDeletedAt(now);
+                piece.setUpdatedAt(now);
+                pieceMapper.updateById(piece);
+            }
+        }
+
+        return Result.success(Code.REQUEST_SUCCESS, "分类及其拼图已删除");
+    }
 }
+
