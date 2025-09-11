@@ -134,8 +134,8 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
             map.put("pieceNumber", pieceNumber);
             map.put("x", 0); // 初始未拼上，统一 (0,0)
             map.put("y", 0);
-            map.put("correctX", correctRow); // 表格坐标
-            map.put("correctY", correctCol);
+            map.put("correctX", correctCol); // 表格坐标
+            map.put("correctY", correctRow);
             map.put("placed", false);
             map.put("url", p.getUrl());
             initialPieces.add(map);
