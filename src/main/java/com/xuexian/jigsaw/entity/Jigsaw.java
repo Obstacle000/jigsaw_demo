@@ -39,4 +39,8 @@ public class Jigsaw {
 
     @Schema(description = "拼图文件URL", example = "https://example.com/jigsaw.zip")
     private String url;
+
+    @Schema(description = "用户是否完成", example = "true")
+    @TableField(exist = false)
+    private boolean done;
 }

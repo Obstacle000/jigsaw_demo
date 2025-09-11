@@ -55,6 +55,7 @@ public class CommonServiceImpl implements CommonService {
     private RedisTemplate stringRedisTemplate;
 
     @Override
+    @Transactional
     public Result uploadJigsawBackground(Long jigsawId, MultipartFile file) {
         if (!isAdmin()) return Result.error(Code.NO_GRANTED, "无权限");
 
@@ -126,6 +127,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    @Transactional
     public Result uploadJigsaw(Long jigsawId, Integer categoryId, String title, Integer pieceCount, String background, MultipartFile file) {
         if (!isAdmin()) return Result.error(Code.NO_GRANTED, "无权限");
 

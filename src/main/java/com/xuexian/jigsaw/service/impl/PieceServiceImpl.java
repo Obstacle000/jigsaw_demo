@@ -15,6 +15,7 @@ import com.xuexian.jigsaw.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
@@ -148,6 +149,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
 
 
     @Override
+    @Transactional
     public Result saveOrComplete(Long jigsawId, String piecesJson) {
         Long userId = UserHolder.getUser().getId();
         String currentKey = String.format(CURRENT_KEY, jigsawId, userId);
@@ -201,6 +203,7 @@ public class PieceServiceImpl extends ServiceImpl<PieceMapper, Piece> implements
     }
 
     @Override
+    @Transactional
     public Result getCurrentPieces(Long jigsawId) {
         Long id = UserHolder.getUser().getId();
         String userKey = String.format(CURRENT_KEY, jigsawId, id);
