@@ -20,7 +20,7 @@ public class PasswordEncoder {
         // 加密
         return salt + "@" + DigestUtils.md5DigestAsHex((password + salt).getBytes(StandardCharsets.UTF_8));
     }
-    public static Boolean matches(String encodedPassword, String rawPassword) {
+    public static Boolean matches(String rawPassword,String encodedPassword) {
         if (encodedPassword == null || rawPassword == null) {
             return false;
         }

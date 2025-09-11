@@ -8,6 +8,7 @@ import com.xuexian.jigsaw.entity.User;
 import com.xuexian.jigsaw.service.IUserService;
 import com.xuexian.jigsaw.util.JwtUtil;
 import com.xuexian.jigsaw.util.PasswordEncoder;
+import com.xuexian.jigsaw.util.SchoolJwtUtil;
 import com.xuexian.jigsaw.vo.LoginResponse;
 import com.xuexian.jigsaw.vo.Result;
 import io.jsonwebtoken.Claims;
@@ -39,35 +40,39 @@ public class AuthController {
     /**
      * 统一认证拿到一次jwt,解析后重定向到默认拼图页面
      */
-    @ResponseBody
     @SneakyThrows
     @RequestMapping("/casLogin")
-    public String login(
+    public void login(
             @RequestParam String token,
             HttpServletResponse response
     ) {
-        Claims claims = JwtUtil.parseToken(token);
-        String casId = claims.get("casID").toString();
+        String key = "jigsaw";
+        String casId = SchoolJwtUtil.getClaim(token, key);
         if (casId == null) {
-            return "登入失败，token不合法！";
-        } else {
-            User user = userService.getOne(Wrappers.<User>lambdaQuery()
-                    .eq(User::getUserName, casId));
-            if (user == null) {
-                user = new User()
-                        .setUserName(casId)
-                        .setPassword(PasswordEncoder.encode(casId))
-                        .setNickName("用户_" + casId)
-                        .setCreateTime(LocalDateTime.now())
-                        .setUpdateTime(LocalDateTime.now())
-                        .setLevel(1L);
-                userService.save(user);
-                userService.assignRole(user.getId(), "USER");
-            }
-            response.sendRedirect(CasPageLogin.DEFAULT_FORWARD + "?casId=" + casId);
-            return null;
+            // 非法登入逻辑处理
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token 不合法或已过期！");
+            return;
         }
+
+
+        User user = userService.getOne(Wrappers.<User>lambdaQuery()
+                .eq(User::getUserName, casId));
+        if (user == null) {
+            user = new User()
+                    .setUserName(casId)
+                    .setPassword(PasswordEncoder.encode(casId)) // 你说先不用管密码安全
+                    .setNickName("用户_" + casId)
+                    .setCreateTime(LocalDateTime.now())
+                    .setUpdateTime(LocalDateTime.now())
+                    .setLevel(1L);
+            userService.save(user);
+            userService.assignRole(user.getId(), "USER");
+        }
+
+        // 跳转到前端首页
+        response.sendRedirect(CasPageLogin.DEFAULT_FORWARD + "?casId=" + casId);
     }
+
 
     /**
      * 从拼图首页登陆的自定义登录业务
@@ -90,7 +95,7 @@ public class AuthController {
             return Result.error(USER_NOT_EXIST, "用户不存在");
         }
 
-        if (!PasswordEncoder.matches(user.getPassword(), loginForm.getPassword())) {
+        if (!PasswordEncoder.matches( loginForm.getPassword(),user.getPassword())) {
             return Result.error(PASSWORD_ERROR, "密码错误");
         }
 
