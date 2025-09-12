@@ -21,7 +21,7 @@ public class SchoolJwtUtil {
     private static final String CLAIM_KEY = "casID";
 
     // 十秒过期
-    private static final long expire = 1000000;
+    private static final long expire = 10000;
 
     private static final byte[] salt = "KOISHIKISHIKAWAIIKAWAIIKISSKISSLOVELY".getBytes(StandardCharsets.UTF_8);
 
