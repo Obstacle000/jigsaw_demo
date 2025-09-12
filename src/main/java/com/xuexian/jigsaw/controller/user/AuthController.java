@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +38,15 @@ public class AuthController {
     @Autowired
     private IUserService userService;
 
+
+
     /**
      * 统一认证拿到一次jwt,解析后重定向到默认拼图页面
      */
     @SneakyThrows
     @RequestMapping("/casLogin")
     public void login(
-            @RequestParam String token,
+            @RequestParam("token") String token,
             HttpServletResponse response
     ) {
         String key = "jigsaw";
